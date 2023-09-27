@@ -1,0 +1,379 @@
+<html>
+<head>
+    <title>Biblioteca Valterlinda Queiroz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            width: 400px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"], input[type="password"], input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+        input[type="checkbox"] {
+            margin-left: 10px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #0099ff;
+            color: white;
+            border: none;
+            margin-top: 20px;
+        }
+
+        .message {
+            text-align: center;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Biblioteca Valterlinda Queiroz</h1>
+    <div id="container">
+        <form id="login-form">
+            <label for="matricula">Matrícula:</label>
+            <input type="number" id="matricula" name="matricula" required>
+            <label for="senha">Senha:</label>
+            <input type="password" id="senha" name="senha" required minlength="6" maxlength="6">
+            <button type="submit" id="login-button">Entrar</button>
+        </form>
+        <form id="cadastro-form" style="display:none;">
+            <label for="nome">Digite seu nome completo:</label>
+            <input type="text" id="nome" name="nome" required>
+            <label for="matricula">Digite sua matrícula:</label>
+            <input type="number" id="matricula" name="matricula" required>
+            <label for="senha">Digite uma senha de 6 dígitos numéricos:</label>
+            <input type="password" id="senha" name="senha" required minlength="6" maxlength="6">
+            <button type="submit" id="cadastro-button">Cadastrar</button>
+        </form>
+        <form id="biblioteca-form" style="display:none;">
+            <p>O que você está fazendo na biblioteca?</p>
+            <label><input type="checkbox" id="circulacao" name="circulacao">Circulação</label>
+            <label><input type="checkbox" id="consulta" name="consulta">Consulta</label>
+            <label><input type="checkbox" id="ajuda" name="ajuda">Ajuda</label>
+            <label><input type="checkbox" id="outro" name="outro">Outro</label>
+            <button type="submit" id="biblioteca-button">Submeter</button>
+        </form>
+        <p class="message"></p>
+    </div>
+
+    <script>
+
+        // Variáveis para armazenar os elementos do HTML
+        var loginForm = document.getElementById("login-form");
+        var loginButton = document.getElementById("login-button");
+        var cadastroForm = document.getElementById("cadastro-form");
+        var cadastroButton = document.getElementById("cadastro-button");
+        var bibliotecaForm = document.getElementById("biblioteca-form");
+        var bibliotecaButton = document.getElementById("biblioteca-button");
+        var message = document.querySelector(".message");
+
+        // Função para verificar se o usuário já tem uma conta cadastrada
+        function verificarConta(matricula, senha) {
+            
+            // Verificar se o navegador suporta o armazenamento local
+            if (typeof(Storage) !== "undefined") {
+
+                // Verificar se existe uma conta com a matrícula informada
+                if (localStorage.getItem(matricula) !== null) {
+
+                    // Obter os dados da conta
+                    var conta = JSON.parse(localStorage.getItem(matricula));
+
+                    // Verificar se a senha informada é igual à senha da conta
+                    if (senha === conta.senha) {
+
+                        // Retornar verdadeiro se a conta existir e a senha for correta
+                        return true;
+
+                    } else {
+
+                        // Retornar falso se a senha for incorreta
+                        return false;
+
+                    }
+
+                } else {
+
+                    // Retornar falso se a conta não existir
+                    return false;
+
+                }
+
+            } else {
+
+                // Mostrar uma mensagem de erro se o navegador não suportar o armazenamento local
+                message.textContent = "Desculpe, seu navegador não suporta o armazenamento local.";
+                
+                // Retornar falso se o navegador não suportar o armazenamento local
+                return false;
+
+            }
+
+        }
+
+        // Função para criar uma nova conta
+        function criarConta(matricula, senha, nome) {
+
+            // Verificar se o navegador suporta o armazenamento local
+            if (typeof(Storage) !== "undefined") {
+
+                // Criar um objeto com os dados da conta
+                var conta = {
+                    matricula: matricula,
+                    senha: senha,
+                    nome: nome
+                };
+
+                // Converter o objeto em uma string JSON
+                var contaJSON = JSON.stringify(conta);
+
+                // Armazenar a string JSON no armazenamento local usando a matrícula como chave
+                localStorage.setItem(matricula, contaJSON);
+
+                // Mostrar uma mensagem de sucesso
+                message.textContent = "Conta criada com sucesso!";
+
+            } else {
+
+                // Mostrar uma mensagem de erro se o navegador não suportar o armazenamento local
+                message.textContent = "Desculpe, seu navegador não suporta o armazenamento local.";
+
+            }
+
+        }
+
+        // Função para registrar o que o usuário está fazendo na biblioteca
+        function registrarBiblioteca(matricula, circulacao, consulta, ajuda, outro) {
+
+            // Verificar se o navegador suporta o armazenamento local
+            if (typeof(Storage) !== "undefined") {
+
+                // Obter os dados da conta do usuário
+                var conta = JSON.parse(localStorage.getItem(matricula));
+
+                // Criar um objeto com os dados do registro
+                var registro = {
+                    matricula: matricula,
+                    nome: conta.nome,
+                    data: new Date().toLocaleDateString(),
+                    hora: new Date().toLocaleTimeString(),
+                    circulacao: circulacao,
+                    consulta: consulta,
+                    ajuda: ajuda,
+                    outro: outro
+                };
+
+                // Converter o objeto em uma string JSON
+                var registroJSON = JSON.stringify(registro);
+
+                // Verificar se já existe algum registro no armazenamento local
+                if (localStorage.getItem("registros") !== null) {
+
+                    // Obter o array de registros do armazenamento local
+                    var registros = JSON.parse(localStorage.getItem("registros"));
+
+                    // Adicionar o novo registro ao array de registros
+                    registros.push(registroJSON);
+
+                    // Converter o array de registros em uma string JSON
+                    var registrosJSON = JSON.stringify(registros);
+
+                    // Armazenar a string JSON no armazenamento local usando "registros" como chave
+                    localStorage.setItem("registros", registrosJSON);
+
+                } else {
+
+                    // Criar um array vazio de registros
+                    var registros = [];
+
+                    // Adicionar o novo registro ao array de registros
+                    registros.push(registroJSON);
+
+                    // Converter o array de registros em uma string JSON
+                    var registrosJSON = JSON.stringify(registros);
+
+                    // Armazenar a string JSON no armazenamento local usando "registros" como chave
+                    localStorage.setItem("registros", registrosJSON);
+
+                }
+
+                // Mostrar uma mensagem de sucesso
+                message.textContent = "Resposta enviada!";
+
+            } else {
+
+                // Mostrar uma mensagem de erro se o navegador não suportar o armazenamento local
+                message.textContent = "Desculpe, seu navegador não suporta o armazenamento local.";
+
+            }
+
+        }
+
+        // Função para mostrar o formulário da biblioteca se o usuário já estiver logado
+        function mostrarBiblioteca() {
+
+            // Verificar se o navegador suporta o armazenamento local
+            if (typeof(Storage) !== "undefined") {
+
+                // Verificar se existe uma chave "logado" no armazenamento local
+                if (localStorage.getItem("logado") !== null) {
+
+                    // Obter a matrícula do usuário logado
+                    var matricula = localStorage.getItem("logado");
+
+                    // Obter os dados da conta do usuário logado
+                    var conta = JSON.parse(localStorage.getItem(matricula));
+
+                    // Mostrar uma mensagem de boas-vindas com o nome do usuário logado
+                    message.textContent = "Bem-vindo(a), " + conta.nome + "!";
+
+                    // Esconder os formulários de login e cadastro
+                    loginForm.style.display = "none";
+                    cadastroForm.style.display = "none";
+
+                    // Mostrar o formulário da biblioteca
+                    bibliotecaForm.style.display = "block";
+
+                }
+
+            } else {
+
+                // Mostrar uma mensagem de erro se o navegador não suportar o armazenamento local
+                message.textContent = "Desculpe, seu navegador não suporta o armazenamento local.";
+
+            }
+
+        }
+
+        // Adicionar um evento de clique ao botão de login
+        loginButton.addEventListener("click", function(event) {
+
+            // Prevenir que o formulário seja enviado e a página recarregada
+            event.preventDefault();
+                    // Obter os valores dos campos de matrícula e senha
+        var matricula = document.getElementById("matricula").value;
+        var senha = document.getElementById("senha").value;
+
+        // Verificar se os campos de matrícula e senha estão preenchidos
+        if (matricula && senha) {
+
+            // Verificar se o usuário já tem uma conta cadastrada
+            if (verificarConta(matricula, senha)) {
+
+                // Armazenar a matrícula do usuário logado no armazenamento local usando "logado" como chave
+                localStorage.setItem("logado", matricula);
+
+                // Mostrar o formulário da biblioteca
+                mostrarBiblioteca();
+
+            } else {
+
+                // Mostrar uma mensagem de erro se a conta não existir ou a senha for incorreta
+                message.textContent = "Matrícula ou senha inválidos. Por favor, tente novamente ou cadastre-se.";
+
+                // Mostrar o formulário de cadastro
+                cadastroForm.style.display = "block";
+
+            }
+
+        } else {
+
+            // Mostrar uma mensagem de erro se os campos de matrícula e senha estiverem vazios
+            message.textContent = "Por favor, preencha os campos de matrícula e senha.";
+
+        }
+
+    });
+
+    // Adicionar um evento de clique ao botão de cadastro
+    cadastroButton.addEventListener("click", function(event) {
+
+        // Prevenir que o formulário seja enviado e a página seja recarregada
+        event.preventDefault();
+
+        // Obter os valores dos campos de matrícula, senha e nome
+        var matricula = document.getElementById("matricula").value;
+        var senha = document.getElementById("senha").value;
+        var nome = document.getElementById("nome").value;
+
+        // Verificar se os campos de matrícula, senha e nome estão preenchidos
+        if (matricula && senha && nome) {
+
+            // Criar uma nova conta com os dados informados
+            criarConta(matricula, senha, nome);
+
+            // Armazenar a matrícula do usuário logado no armazenamento local usando "logado" como chave
+            localStorage.setItem("logado", matricula);
+
+            // Mostrar o formulário da biblioteca
+            mostrarBiblioteca();
+
+        } else {
+
+            // Mostrar uma mensagem de erro se algum dos campos estiver vazio
+            message.textContent = "Por favor, preencha todos os campos.";
+
+        }
+
+    });
+
+    // Adicionar um evento de clique ao botão de submeter
+    bibliotecaButton.addEventListener("click", function(event) {
+
+        // Prevenir que o formulário seja enviado e a página seja recarregada
+        event.preventDefault();
+
+        // Obter a matrícula do usuário logado
+        var matricula = localStorage.getItem("logado");
+
+        // Obter os valores dos campos de circulação, consulta, ajuda e outro
+        var circulacao = document.getElementById("circulacao").checked;
+        var consulta = document.getElementById("consulta").checked;
+        var ajuda = document.getElementById("ajuda").checked;
+        var outro = document.getElementById("outro").checked;
+
+        // Verificar se pelo menos um dos campos está marcado
+        if (circulacao || consulta || ajuda || outro) {
+
+            // Registrar o que o usuário está fazendo na biblioteca
+            registrarBiblioteca(matricula, circulacao, consulta, ajuda, outro);
+
+            // Limpar os campos marcados
+            document.getElementById("circulacao").checked = false;
+            document.getElementById("consulta").checked = false;
+            document.getElementById("ajuda").checked = false;
+            document.getElementById("outro").checked = false;
+
+        } else {
+
+            // Mostrar uma mensagem de erro se nenhum dos campos estiver marcado
+            message.textContent = "Por favor, marque pelo menos uma das opções.";
+
+        }
+
+    });
+
+    // Mostrar o formulário da biblioteca se o usuário já estiver logado ao carregar a página
+    window.onload = mostrarBiblioteca;
+
+</script>
